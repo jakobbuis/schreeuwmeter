@@ -10,7 +10,7 @@ $(document).ready(function(){
     }
 
     // Connect to the microphone
-    navigator.getUserMedia({video: false, audio: true}, setupMeter, showError);
+    navigator.getUserMedia({video: false, audio: true}, setupMeter, function(){});
 
     // Setup the canvas
     window.canvas = $("#meter").get()[0].getContext("2d");
@@ -21,28 +21,6 @@ $(document).ready(function(){
     window.gradient.addColorStop(0.33,'#ffff00');
     window.gradient.addColorStop(0,'#00ff00');
 });
-
-/**
- * Show an error message to the user
- * @param  string message
- * @return undefined
- */
-function showError(message)
-{
-    $('#success').hide();
-    $('#error').html('<strong>Fatal error:</strong> ' + message).show();
-}
-
-/**
- * Show a green message to the user
- * @param  string message
- * @return undefined
- */
-function showSuccess(message)
-{
-    $('#success').html(message).show();
-    $('#error').hide();
-}
 
 /**
  * Use the audioStream to connect to the processor
@@ -76,9 +54,6 @@ function setupMeter(localMediaStream)
 
     // Store the max volume level reached
     window.volumeMax = 0;
-
-    // Notify the user that we can start now
-    showSuccess('All set up... start SCREAMING!!');
 }
 
 /**
@@ -88,12 +63,22 @@ function processAudio() {
     // Calculate the volume level
     var array =  new Uint8Array(window.analyser.frequencyBinCount);
     window.analyser.getByteFrequencyData(array);
-    var volume = Math.round(getAverageVolume(array));
+    var volume = getAverageVolume(array);
 
-    // Update the interface
-    window.volumeMax = Math.max(volume, window.volumeMax);
+    // Calculate desired display values
+    var text_volume = Math.round(volume * 84);  // Scales 0 - 8400
+    var graph_volume = Math.round(volume * 2);  // Scales 0 - 200
+
+    // Display max volume reached
+    window.volumeMax = Math.max(window.volumeMax, text_volume);
     $('#max').text(window.volumeMax);
-    drawMeter(volume);
+
+    // Reset the canvas to blank
+    window.canvas.clearRect(0, 0, 100, 100);
+    window.canvas.fillStyle = window.gradient;
+
+    // Draw meter
+    window.canvas.fillRect(0, 0, graph_volume, 100);
 }
 
 /**
@@ -110,18 +95,4 @@ function getAverageVolume(values) {
     };
 
     return sum / count;
-}
-
-/**
- * Draws the meter interface
- * @param  float volume the volume level
- * @return undefined
- */
-function drawMeter(volume) {
-    // Reset the canvas to blank
-    window.canvas.clearRect(0, 0, 100, 100);
-    window.canvas.fillStyle = window.gradient;
-
-    // Draw meter
-    window.canvas.fillRect(0, 0, volume*2, 100);
 }
