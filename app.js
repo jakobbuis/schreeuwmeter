@@ -90,7 +90,7 @@ function processAudio() {
     // Calculate the current volume level
     var array =  new Uint8Array(window.analyser.frequencyBinCount);
     window.analyser.getByteFrequencyData(array);
-    var volume = (array[window.bucket] / 2.56) * window.audioSensitivity;
+    var volume = Math.min(100, (array[window.bucket] / 2.56) * window.audioSensitivity);
 
     // Calculate lagging value for graph smoothing
     window.currentVolume = 0.9 * window.currentVolume + 0.1 * volume;
