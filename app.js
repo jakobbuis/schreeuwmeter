@@ -141,7 +141,7 @@ function configure(event) {
     else if (event.keyCode == 68) { // D toggles debug mode
         window.debug = !window.debug;
     }   
-    else if (event.keyCode >= 49 && event.keyCode <= 57) {  // Numbers (0-9) set the sensitivity; default 5
+    else if (event.shiftKey && event.keyCode >= 49 && event.keyCode <= 57) {  // Numbers (0-9) set the sensitivity; default 5
         window.audioSensitivity = Math.pow(2, event.keyCode - 52);
     }
 }
