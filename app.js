@@ -70,7 +70,7 @@ function processAudio() {
     var volume = array[0] / 2.56;
 
     // Store the maximum volume reached
-    window.volumeMax = Math.max(window.volumeMax, volume * 84);
+    window.volumeMax = Math.round(Math.max(window.volumeMax, volume * 84));
 
     updateUI(volume);
 }
