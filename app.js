@@ -77,6 +77,9 @@ function setupMeter(localMediaStream)
 
     // Disable debug by default
     window.debug = false;
+
+    // Default bucket setting
+    window.bucket = 3;
 }
 
 /**
@@ -86,7 +89,7 @@ function processAudio() {
     // Calculate the current volume level
     var array =  new Uint8Array(window.analyser.frequencyBinCount);
     window.analyser.getByteFrequencyData(array);
-    var volume = (array[3] / 2.56) * window.audioSensitivity;
+    var volume = (array[window.bucket] / 2.56) * window.audioSensitivity;
 
     // Calculate lagging value for graph smoothing
     window.upvolume = 0.9 * window.upvolume + 0.1 * volume;
@@ -140,6 +143,9 @@ function configure(event) {
     }
     else if (event.keyCode == 68) { // D toggles debug mode
         window.debug = !window.debug;
+    }
+    else if (event.keyCode == 66) { // B shows prompt to set bucket number
+        window.bucket = parseInt(prompt('Choose bucket (integers only)'));
     }   
     else if (event.keyCode >= 49 && event.keyCode <= 57) {  // Numbers (0-9) set the sensitivity; default 5
         window.audioSensitivity = Math.pow(2, event.keyCode - 52);
