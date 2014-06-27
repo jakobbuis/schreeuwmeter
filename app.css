@@ -28,8 +28,9 @@ body {
     height: 200px;
 }
 
-h2 {
+h1 {
     font-size: xx-large;
+    margin-top: 0;
 }
 
 .warning-label {

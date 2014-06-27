@@ -36,22 +36,33 @@ function setupMeter(localMediaStream)
     // Fix a bug for mozilla that crashes the input after roughly 5 seconds
     // as per https://support.mozilla.org/en-US/questions/984179
     window.horrible_hack_wtf_for_firefox = source;
-    
-    // Create a processor to interpret the sound
-    processor = context.createScriptProcessor(2048, 1, 1);
 
-    // Setup an analyzer
+    // // Connect a low-pass filter
+    // var filterLow = context.createBiquadFilter();
+    // filterLow.type = 'lowpass';
+    // filterLow.frequency.value = 255;
+    // source.connect(filterLow);
+
+    // // Connect a high-pass filter
+    // var filterHigh = context.createBiquadFilter();
+    // filterHigh.type = 'highpass';
+    // filterHigh.frequency.value = 85;
+    // filterLow.connect(filterHigh);
+
+    // Connect an analyser
     window.analyser = context.createAnalyser();
     window.analyser.smoothingTimeConstant = 0.3;
     window.analyser.fftSize = 1024;
-    window.analyser.frequenyBinCount = 2;
+    window.analyser.frequencyBinCount = 5;
+    source.connect(analyser);
 
-    // Connect the source to the analyser, to the processor
-    source.connect(window.analyser);
+    // Connect a processor to interpret the sound
+    processor = context.createScriptProcessor(2048, 1, 1);
+    processor.onaudioprocess = processAudio;
     analyser.connect(processor);
 
-    processor.onaudioprocess = processAudio;
-    source.connect(processor);
+    // Connect to speakers at the end
+    processor.connect(context.destination);
 
     // Store the max volume level reached
     window.volumeMax = 0;
@@ -65,9 +76,14 @@ function setupMeter(localMediaStream)
  */
 function processAudio() {
     // Calculate the current volume level
-    var array =  new Uint8Array(window.analyser.frequenyBinCount);
+    var array =  new Uint8Array(window.analyser.frequencyBinCount);
     window.analyser.getByteFrequencyData(array);
-    var volume = array[0] / 2.56;
+    var volume = array[3] / 2.56;
+
+    console.log(volume);
+
+    // Calculate lagging value for graph smoothing
+    window.upvolume = 0.9 * window.upvolume + 0.1 * volume;
 
     // Store the maximum volume reached
     window.volumeMax = Math.round(Math.max(window.volumeMax, volume * 84));
@@ -82,14 +98,10 @@ function processAudio() {
  */
 function updateUI(volume) {
     // Display max volume reached
-    $('#max').text(window.volumeMax);
+    $('#max').text(window.volumeMax.toLocaleString());
 
-    drawGraph(volume);
-}
-
-function drawGraph(volume) {
-    // Calculate lagging value for graph smoothing
-    window.upvolume = 0.9 * window.upvolume + 0.1 * volume;
+    var volume = Math.round(window.upvolume * 84).toLocaleString();
+    $('#current').text(volume);
 
     // Reset canvas and draw the meter
     window.canvas.clearRect(0, 0, 100, 100);
