@@ -38,23 +38,22 @@ function setupMeter(localMediaStream)
     window.horrible_hack_wtf_for_firefox = source;
 
     // // Connect a low-pass filter
-    // var filterLow = context.createBiquadFilter();
-    // filterLow.type = 'lowpass';
-    // filterLow.frequency.value = 255;
-    // source.connect(filterLow);
+    var filterLow = context.createBiquadFilter();
+    filterLow.type = 'lowpass';
+    filterLow.frequency.value = 255;
+    source.connect(filterLow);
 
-    // // Connect a high-pass filter
-    // var filterHigh = context.createBiquadFilter();
-    // filterHigh.type = 'highpass';
-    // filterHigh.frequency.value = 85;
-    // filterLow.connect(filterHigh);
+    // Connect a high-pass filter
+    var filterHigh = context.createBiquadFilter();
+    filterHigh.type = 'highpass';
+    filterHigh.frequency.value = 85;
+    filterLow.connect(filterHigh);
 
     // Connect an analyser
-    window.analyser = context.createAnalyser();
+    window.analyser = context.createAnalyser(5);
     window.analyser.smoothingTimeConstant = 0.3;
-    window.analyser.fftSize = 1024;
-    window.analyser.frequencyBinCount = 5;
-    source.connect(analyser);
+    window.analyser.fftSize = 32;
+    filterHigh.connect(analyser);
 
     // Connect a processor to interpret the sound
     processor = context.createScriptProcessor(2048, 1, 1);
@@ -80,8 +79,6 @@ function processAudio() {
     window.analyser.getByteFrequencyData(array);
     var volume = array[3] / 2.56;
 
-    console.log(volume);
-
     // Calculate lagging value for graph smoothing
     window.upvolume = 0.9 * window.upvolume + 0.1 * volume;
 
@@ -103,8 +100,20 @@ function updateUI(volume) {
     var volume = Math.round(window.upvolume * 84).toLocaleString();
     $('#current').text(volume);
 
-    // Reset canvas and draw the meter
+    // // Reset canvas and draw the meter
     window.canvas.clearRect(0, 0, 100, 100);
     window.canvas.fillStyle = window.gradient;
     window.canvas.fillRect(0, 0, window.upvolume, 100);
+
+    //FIXME implement a debug method for seeing buckets
+    // window.canvas.clearRect(0, 0, 100, 100);
+    // window.canvas.fillStyle = window.gradient;
+
+    // var height = (100 / window.analyser.frequencyBinCount);
+    // console.log(window.analyser.frequencyBinCount);
+    // console.log(height);
+
+    // for (var i = array.length - 1; i >= 0; i--) {
+    //     window.canvas.fillRect(0, height*i, array[i], height*(i+1));
+    // };
 }
