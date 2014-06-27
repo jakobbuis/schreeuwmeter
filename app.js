@@ -44,6 +44,7 @@ function setupMeter(localMediaStream)
     window.analyser = context.createAnalyser();
     window.analyser.smoothingTimeConstant = 0.3;
     window.analyser.fftSize = 1024;
+    window.analyser.frequenyBinCount = 2;
 
     // Connect the source to the analyser, to the processor
     source.connect(window.analyser);
@@ -54,45 +55,44 @@ function setupMeter(localMediaStream)
 
     // Store the max volume level reached
     window.volumeMax = 0;
+
+    // Lagging value used for smoothing the graph
+    window.upvolume = 0;
 }
 
 /**
  * Process the audio into a volume level
  */
 function processAudio() {
-    // Calculate the volume level
-    var array =  new Uint8Array(window.analyser.frequencyBinCount);
+    // Calculate the current volume level
+    var array =  new Uint8Array(window.analyser.frequenyBinCount);
     window.analyser.getByteFrequencyData(array);
-    var volume = getAverageVolume(array);
+    var volume = array[0] / 2.56;
 
-    // Calculate desired display values
-    var text_volume = Math.round(volume * 84);  // Scales 0 - 8400
-    var graph_volume = Math.round(volume * 2);  // Scales 0 - 200
+    // Store the maximum volume reached
+    window.volumeMax = Math.max(window.volumeMax, volume * 84);
 
-    // Display max volume reached
-    window.volumeMax = Math.max(window.volumeMax, text_volume);
-    $('#max').text(window.volumeMax);
-
-    // Reset the canvas to blank
-    window.canvas.clearRect(0, 0, 100, 100);
-    window.canvas.fillStyle = window.gradient;
-
-    // Draw meter
-    window.canvas.fillRect(0, 0, graph_volume, 100);
+    updateUI(volume);
 }
 
 /**
- * Returns the average volume of an event buffer
- * @param  array values
- * @return float
+ * Updates the UI components to display the new volume
+ * @param  integer   volume
+ * @return undefined
  */
-function getAverageVolume(values) {
-    var sum = 0;
-    var count = values.length;
+function updateUI(volume) {
+    // Display max volume reached
+    $('#max').text(window.volumeMax);
 
-    for (i = 0; i< count; i++) {
-        sum += values[i];
-    };
+    drawGraph(volume);
+}
 
-    return sum / count;
+function drawGraph(volume) {
+    // Calculate lagging value for graph smoothing
+    window.upvolume = Math.round(0.9 * window.upvolume + 0.1 * volume);
+
+    // Reset canvas and draw the meter
+    window.canvas.clearRect(0, 0, 100, 100);
+    window.canvas.fillStyle = window.gradient;
+    window.canvas.fillRect(0, 0, window.upvolume, 100);
 }
