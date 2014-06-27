@@ -89,7 +89,7 @@ function updateUI(volume) {
 
 function drawGraph(volume) {
     // Calculate lagging value for graph smoothing
-    window.upvolume = Math.round(0.9 * window.upvolume + 0.1 * volume);
+    window.upvolume = 0.9 * window.upvolume + 0.1 * volume;
 
     // Reset canvas and draw the meter
     window.canvas.clearRect(0, 0, 100, 100);
