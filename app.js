@@ -139,14 +139,23 @@ function configure(event) {
     if (event.keyCode === 82) { // R resets graph and max volume reached
         window.currentVolume = 0;
         window.maxVolume = 0;
+        console.log('Reset volumes');
     }
     else if (event.keyCode == 68) { // D toggles debug mode
         window.debug = !window.debug;
+        if (window.debug) {
+            console.log('Debug ON');
+        }
+        else {
+            console.log('Debug OFF');
+        }
     }
     else if (event.keyCode == 66) { // B shows prompt to set bucket number
         window.bucket = parseInt(prompt('Choose bucket (integers only)'));
+        console.log('Using bucket ' + window.bucket);
     }   
     else if (event.keyCode >= 49 && event.keyCode <= 57) {  // Numbers (0-9) set the sensitivity; default 5
         window.audioSensitivity = Math.pow(2, event.keyCode - 52);
+        console.log('Audio sensitivity set to ' + window.audiosensitivity);
     }
 }
