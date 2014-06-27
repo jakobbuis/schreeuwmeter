@@ -155,7 +155,7 @@ function configure(event) {
         console.log('Using bucket ' + window.bucket);
     }   
     else if (event.keyCode >= 49 && event.keyCode <= 57) {  // Numbers (0-9) set the sensitivity; default 5
-        window.audioSensitivity = Math.pow(2, event.keyCode - 52);
-        console.log('Audio sensitivity set to ' + window.audiosensitivity);
+        window.audioSensitivity = Math.pow(2, event.keyCode - 53);
+        console.log('Audio sensitivity set to ' + window.audioSensitivity);
     }
 }
