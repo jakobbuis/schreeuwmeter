@@ -67,10 +67,10 @@ function setupMeter(localMediaStream)
     processor.connect(context.destination);
 
     // Store the max volume level reached
-    window.volumeMax = 0;
+    window.maxVolume = 0;
 
     // Lagging value used for smoothing the graph
-    window.upvolume = 0;
+    window.currentVolume = 0;
 
     // Set default sensitivity
     window.audioSensitivity = 1;
@@ -92,26 +92,25 @@ function processAudio() {
     var volume = (array[window.bucket] / 2.56) * window.audioSensitivity;
 
     // Calculate lagging value for graph smoothing
-    window.upvolume = 0.9 * window.upvolume + 0.1 * volume;
+    window.currentVolume = 0.9 * window.currentVolume + 0.1 * volume;
 
     // Store the maximum volume reached
-    window.volumeMax = Math.round(Math.max(window.volumeMax, volume * 84));
+    window.maxVolume = Math.round(Math.max(window.maxVolume, window.currentVolume));
 
-    updateUI(volume, array);
+    updateUI(array);
 }
 
 /**
  * Updates the UI components to display the new volume
- * @param  integer   volume average volume 
  * @param  array     array  raw array of volume files
  * @return undefined
  */
-function updateUI(volume, array) {
+function updateUI(array) {
     // Display max volume reached
-    $('#max').text(window.volumeMax.toLocaleString());
+    $('#max').text((window.maxVolume * 84).toLocaleString());
 
-    var volume = Math.round(window.upvolume * 84).toLocaleString();
-    $('#current').text(volume);
+    // Display current volume
+    $('#current').text(Math.round(window.currentVolume * 84).toLocaleString());
 
     // Reset canvas and draw the meter
     window.canvas.clearRect(0, 0, 100, 100);
@@ -126,7 +125,7 @@ function updateUI(volume, array) {
     }
     else {
         window.canvas.fillStyle = window.gradient;
-        window.canvas.fillRect(0, 0, window.upvolume, 100);
+        window.canvas.fillRect(0, 0, window.currentVolume, 100);
     }
 }
 
@@ -138,8 +137,8 @@ function updateUI(volume, array) {
 function configure(event) {
 
     if (event.keyCode === 82) { // R resets graph and max volume reached
-        window.upvolume = 0;
-        window.volumeMax = 0;
+        window.currentVolume = 0;
+        window.maxVolume = 0;
     }
     else if (event.keyCode == 68) { // D toggles debug mode
         window.debug = !window.debug;
