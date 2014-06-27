@@ -20,6 +20,9 @@ $(document).ready(function(){
     window.gradient.addColorStop(0.66,'#ffff00');
     window.gradient.addColorStop(0.33,'#ffff00');
     window.gradient.addColorStop(0,'#00ff00');
+
+    // Enable configuration keys
+    $(window).on('keyup', configure);
 });
 
 /**
@@ -68,6 +71,9 @@ function setupMeter(localMediaStream)
 
     // Lagging value used for smoothing the graph
     window.upvolume = 0;
+
+    // Set default sensitivity
+    window.audioSensitivity = 1;
 }
 
 /**
@@ -77,7 +83,7 @@ function processAudio() {
     // Calculate the current volume level
     var array =  new Uint8Array(window.analyser.frequencyBinCount);
     window.analyser.getByteFrequencyData(array);
-    var volume = array[3] / 2.56;
+    var volume = (array[3] / 2.56) * window.audioSensitivity;
 
     // Calculate lagging value for graph smoothing
     window.upvolume = 0.9 * window.upvolume + 0.1 * volume;
@@ -116,4 +122,23 @@ function updateUI(volume) {
     // for (var i = array.length - 1; i >= 0; i--) {
     //     window.canvas.fillRect(0, height*i, array[i], height*(i+1));
     // };
+}
+
+/**
+ * Accepts keypress input to set various configuration options
+ * @param  Event event
+ * @return undefined
+ */
+function configure(event) {
+
+    if (event.keyCode === 82) { // R resets graph and max volume reached
+        window.upvolume = 0;
+        window.volumeMax = 0;
+    }
+    else if (event.keyCode >= 49 && event.keyCode <= 57) {  // Numbers (0-9) set the sensitivity; default 5
+        window.audioSensitivity = Math.pow(2, event.keyCode - 52);
+    }
+    else {
+
+    }
 }
