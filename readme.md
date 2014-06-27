@@ -3,7 +3,7 @@
 [R] - reset maximum volume reached and current volume <br>
 [D] - toggle debug mode (shows individual audio buckets)
 
-[Shift] + [number]: set audiosensitivity (default 5):<br>
+[number]: set audiosensitivity (default 5):<br>
 1: 0.0625<br>
 2: 0.125<br>
 3: 0.25<br>
