@@ -74,6 +74,9 @@ function setupMeter(localMediaStream)
 
     // Set default sensitivity
     window.audioSensitivity = 1;
+
+    // Disable debug by default
+    window.debug = false;
 }
 
 /**
@@ -91,37 +94,37 @@ function processAudio() {
     // Store the maximum volume reached
     window.volumeMax = Math.round(Math.max(window.volumeMax, volume * 84));
 
-    updateUI(volume);
+    updateUI(volume, array);
 }
 
 /**
  * Updates the UI components to display the new volume
- * @param  integer   volume
+ * @param  integer   volume average volume 
+ * @param  array     array  raw array of volume files
  * @return undefined
  */
-function updateUI(volume) {
+function updateUI(volume, array) {
     // Display max volume reached
     $('#max').text(window.volumeMax.toLocaleString());
 
     var volume = Math.round(window.upvolume * 84).toLocaleString();
     $('#current').text(volume);
 
-    // // Reset canvas and draw the meter
+    // Reset canvas and draw the meter
     window.canvas.clearRect(0, 0, 100, 100);
-    window.canvas.fillStyle = window.gradient;
-    window.canvas.fillRect(0, 0, window.upvolume, 100);
 
-    //FIXME implement a debug method for seeing buckets
-    // window.canvas.clearRect(0, 0, 100, 100);
-    // window.canvas.fillStyle = window.gradient;
+    if (window.debug) {
+        window.canvas.fillStyle = 'black';
+        var height = (100 / array.length) - 5;
 
-    // var height = (100 / window.analyser.frequencyBinCount);
-    // console.log(window.analyser.frequencyBinCount);
-    // console.log(height);
-
-    // for (var i = array.length - 1; i >= 0; i--) {
-    //     window.canvas.fillRect(0, height*i, array[i], height*(i+1));
-    // };
+        for (var i = array.length - 1; i >= 0; i--) {
+            window.canvas.fillRect(0, (height+5)*i, array[i], (height)*(i+1));
+        };
+    }
+    else {
+        window.canvas.fillStyle = window.gradient;
+        window.canvas.fillRect(0, 0, window.upvolume, 100);
+    }
 }
 
 /**
@@ -135,10 +138,10 @@ function configure(event) {
         window.upvolume = 0;
         window.volumeMax = 0;
     }
+    else if (event.keyCode == 68) { // D toggles debug mode
+        window.debug = !window.debug;
+    }   
     else if (event.keyCode >= 49 && event.keyCode <= 57) {  // Numbers (0-9) set the sensitivity; default 5
         window.audioSensitivity = Math.pow(2, event.keyCode - 52);
-    }
-    else {
-
     }
 }
