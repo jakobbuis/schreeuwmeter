@@ -9,8 +9,23 @@ $(document).ready(function(){
         return;
     }
 
+    // Store the max volume level reached
+    window.maxVolume = 0;
+
+    // Lagging value used for smoothing the graph
+    window.currentVolume = 0;
+
+    // Set default sensitivity
+    window.audioSensitivity = 1;
+
+    // Disable debug by default
+    window.debug = false;
+
+    // Default bucket setting
+    window.bucket = 3;
+
     // Connect to the microphone
-    navigator.getUserMedia({video: false, audio: true}, setupMeter, function(){});
+    navigator.getUserMedia({video: false, audio: true}, setupMeter, function(message){alert(message);});
 
     // Setup the canvas
     window.canvas = $("#meter").get()[0].getContext("2d");
@@ -66,20 +81,6 @@ function setupMeter(localMediaStream)
     // Connect to speakers at the end
     processor.connect(context.destination);
 
-    // Store the max volume level reached
-    window.maxVolume = 0;
-
-    // Lagging value used for smoothing the graph
-    window.currentVolume = 0;
-
-    // Set default sensitivity
-    window.audioSensitivity = 1;
-
-    // Disable debug by default
-    window.debug = false;
-
-    // Default bucket setting
-    window.bucket = 3;
 }
 
 /**
